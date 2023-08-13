@@ -23,6 +23,7 @@ public class Author {
     private String firstName;
     @NotBlank
     private  String lastName;
+
     @OneToMany(fetch = FetchType.EAGER, targetEntity = Book.class)
     @JoinTable(name = "author_books", joinColumns = @JoinColumn(name = "author_id"), inverseJoinColumns = @JoinColumn(name = "book_id"))
     private Set<Book> publishedBooks;
