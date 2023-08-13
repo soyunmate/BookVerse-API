@@ -21,6 +21,6 @@ public class Genre {
     private String name;
     private String description;
     private String icon;
-    @ManyToMany(fetch = FetchType.EAGER, targetEntity = Book.class, mappedBy = "genre")
+    @ManyToMany(fetch = FetchType.LAZY, targetEntity = Book.class, mappedBy = "genre")
     private Set<Book> books;
 }

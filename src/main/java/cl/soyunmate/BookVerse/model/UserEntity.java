@@ -29,6 +29,10 @@ public class UserEntity {
     @NotBlank
     private String email;
 
+    private String firstName;
+
+    private String LastName;
+
     @OneToMany(fetch = FetchType.EAGER, targetEntity = ShippingAddress.class)
     @JoinTable(name = "user_addresses", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "address_id"))
     private ArrayList<ShippingAddress> addresses;
