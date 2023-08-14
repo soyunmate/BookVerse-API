@@ -14,13 +14,16 @@ import java.util.Set;
 public interface BookRepository extends JpaRepository<Book, Long> {
     Set<Book> findByAuthor(Author author);
 
-    Set<Book> findByGenre(Genre genre);
+    @Query("SELECT DISTINCT b FROM Book b JOIN b.genre g WHERE g = :genre")
+    Set<Book> findByGenre(@Param("genre") Genre genre);
 
     Set<Book> findByPublisher(Publisher publisher);
 
     Set<Book> findByLanguage(String language);
 
-    Set<Book> findByTag(Tag tag);
+
+    @Query("SELECT DISTINCT b FROM Book b JOIN b.tags t WHERE t = :tag")
+    Set<Book> findByTag(@Param("tag") Tag tag);
 
     @Query("SELECT b FROM Book b WHERE b.title LIKE %:pattern%")
     List<Book> findByTitleContainingPattern(@Param("pattern") String pattern);

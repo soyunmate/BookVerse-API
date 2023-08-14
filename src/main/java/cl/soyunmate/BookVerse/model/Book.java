@@ -41,7 +41,7 @@ public class Book {
     @NotBlank
     private String language;
     private Integer pages;
-    @OneToMany(fetch = FetchType.EAGER, targetEntity = Tag.class)
+    @ManyToMany(fetch = FetchType.EAGER, targetEntity = Tag.class)
     @JoinTable(name = "book_tags", joinColumns = @JoinColumn(name = "book_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private Set<Tag> tags;
 
