@@ -21,7 +21,6 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     Set<Book> findByLanguage(String language);
 
-
     @Query("SELECT DISTINCT b FROM Book b JOIN b.tags t WHERE t = :tag")
     Set<Book> findByTag(@Param("tag") Tag tag);
 
@@ -30,7 +29,6 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     @Query("SELECT b FROM Book b WHERE b.author.firstName LIKE %:authorPattern% OR b.author.lastName LIKE %:authorPattern%")
     List<Book> findByAuthorNameContainingPattern(@Param("authorPattern") String authorPattern);
-
 
     Optional<Book>findByIsbn(String isbn);
 }

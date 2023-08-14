@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/vi/books")
+@RequestMapping("/api/v1/books")
 public class BookApiController {
     @Autowired
     private IBookService bookService;

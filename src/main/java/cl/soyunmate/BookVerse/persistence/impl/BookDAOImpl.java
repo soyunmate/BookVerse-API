@@ -3,6 +3,7 @@ package cl.soyunmate.BookVerse.persistence.impl;
 import cl.soyunmate.BookVerse.model.*;
 import cl.soyunmate.BookVerse.persistence.IBookDAO;
 import cl.soyunmate.BookVerse.repository.BookRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.Set;
 
 @Component
 public class BookDAOImpl implements IBookDAO {
-
+    @Autowired
     private BookRepository bookRepository;
 
     @Override

@@ -1,5 +1,6 @@
 package cl.soyunmate.BookVerse.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -21,6 +22,6 @@ public class Genre {
     private String name;
     private String description;
     private String icon;
-    @ManyToMany(fetch = FetchType.LAZY, targetEntity = Book.class, mappedBy = "genre")
+    @ManyToMany(fetch = FetchType.EAGER, targetEntity = Book.class)
     private Set<Book> books;
 }

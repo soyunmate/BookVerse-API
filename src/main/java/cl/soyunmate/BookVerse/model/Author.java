@@ -1,5 +1,6 @@
 package cl.soyunmate.BookVerse.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -24,8 +25,9 @@ public class Author {
     @NotBlank
     private  String lastName;
 
-    @OneToMany(fetch = FetchType.EAGER, targetEntity = Book.class)
+    @OneToMany(fetch = FetchType.LAZY, targetEntity = Book.class)
     @JoinTable(name = "author_books", joinColumns = @JoinColumn(name = "author_id"), inverseJoinColumns = @JoinColumn(name = "book_id"))
+    @JsonIgnore
     private Set<Book> publishedBooks;
     private String nationality;
     private String birthDate;
