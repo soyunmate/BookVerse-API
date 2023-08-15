@@ -111,7 +111,7 @@ public class BookApiController {
 
             return ResponseEntity.ok(Response.builder()
                     .timeStamp(LocalDateTime.now())
-                    .data(Map.of("books", booKDTO))
+                    .data(Map.of("book", booKDTO))
                     .message("Book Retrieved")
                     .status(HttpStatus.OK)
                     .statusCode(HttpStatus.OK.value())
@@ -153,7 +153,7 @@ public class BookApiController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(Response.builder()
                 .timeStamp(LocalDateTime.now())
-                .message("Book Saved")
+                .message("Book Created")
                 .status(HttpStatus.CREATED)
                 .statusCode(HttpStatus.CREATED.value())
                 .build());

@@ -20,11 +20,9 @@ public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String title;
     @Column(unique = true)
     private String isbn;
-
     @ManyToOne
     @JoinColumn(name = "author_id")
     private Author author;
