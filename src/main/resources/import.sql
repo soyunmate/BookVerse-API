@@ -11,8 +11,8 @@ INSERT INTO authors (biography, birth_date, first_name, last_name, nationality) 
 INSERT INTO authors (biography, birth_date, first_name, last_name, nationality) VALUES ('Biografía de Autor 2', '1985-03-15', 'Autor', 'Dos', 'Nacionalidad 2');
 
 -- Géneros
-INSERT INTO genres (description, icon, name) VALUES ('Género 1', 'icono1.png', 'Género A');
-INSERT INTO genres (description, icon, name) VALUES ('Género 2', 'icono2.png', 'Género B');
+INSERT INTO genres (description, icon, name) VALUES ('Género 1', 'icono1.png', 'FANTASY');
+INSERT INTO genres (description, icon, name) VALUES ('Género 2', 'icono2.png', 'SCI_FI');
 
 -- Libros
 INSERT INTO books (description, isbn, language, pages, publish_date, stock, title, author_id, publisher_id) VALUES ('Descripción del libro 1', '1234567890', 'Español', 300, '2023-01-15', 50, 'Libro 1', 1, 1);

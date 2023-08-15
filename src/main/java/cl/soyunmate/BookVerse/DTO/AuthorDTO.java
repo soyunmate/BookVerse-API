@@ -1,6 +1,8 @@
-package cl.soyunmate.BookVerse.model;
+package cl.soyunmate.BookVerse.DTO;
 
+import cl.soyunmate.BookVerse.model.Book;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -10,25 +12,18 @@ import lombok.NoArgsConstructor;
 
 import java.util.Set;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Entity
-@Table(name = "authors")
-public class Author {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+@JsonInclude(NON_NULL)
+public class AuthorDTO {
     private Long id;
-
     private String firstName;
-
     private  String lastName;
-
-    @OneToMany(fetch = FetchType.LAZY, targetEntity = Book.class)
-    @JoinTable(name = "author_books", joinColumns = @JoinColumn(name = "author_id"), inverseJoinColumns = @JoinColumn(name = "book_id"))
-    @JsonIgnore
-    private Set<Book> publishedBooks;
+    private Set<BooKDTO> publishedBooks;
     private String nationality;
     private String birthDate;
     private String biography;

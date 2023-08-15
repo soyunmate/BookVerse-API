@@ -1,22 +1,23 @@
-package cl.soyunmate.BookVerse.model;
+package cl.soyunmate.BookVerse.DTO;
 
 import cl.soyunmate.BookVerse.model.enums.ETag;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Entity
-@Table(name = "tags")
-public class Tag {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+@JsonInclude(NON_NULL)
+public class TagDTO {
+
     private Long id;
-    @Enumerated(EnumType.STRING)
+
     private ETag name;
 }

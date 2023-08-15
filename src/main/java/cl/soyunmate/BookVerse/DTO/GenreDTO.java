@@ -1,7 +1,8 @@
-package cl.soyunmate.BookVerse.model;
+package cl.soyunmate.BookVerse.DTO;
 
+import cl.soyunmate.BookVerse.model.Book;
 import cl.soyunmate.BookVerse.model.enums.EGenre;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -11,21 +12,18 @@ import lombok.NoArgsConstructor;
 
 import java.util.Set;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Entity
-@Table(name = "genres")
-public class Genre {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@JsonInclude(NON_NULL)
+public class GenreDTO {
 
-    @Enumerated(EnumType.STRING)
+    private Long id;
     private EGenre name;
     private String description;
     private String icon;
-    @ManyToMany(fetch = FetchType.EAGER, targetEntity = Book.class)
-    private Set<Book> books;
+    private Set<BooKDTO> books;
 }
