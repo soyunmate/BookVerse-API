@@ -10,14 +10,11 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -25,16 +22,16 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/v1/books")
+@RequestMapping("/api/v1")
 public class BookApiController {
     @Autowired
     private IBookService bookService;
 
-    @GetMapping("/findAll")
+    @GetMapping("/books")
     public ResponseEntity<Response> findAll() {
         List<Book> bookList = bookService.findAll();
-        List<BooKDTO> bookDTOList = bookList.stream()
-                .map(book -> BooKDTO.builder()
+        List<BookDTO> bookDTOList = bookList.stream()
+                .map(book -> BookDTO.builder()
                         .id(book.getId())
                         .isbn(book.getIsbn())
                         .title(book.getTitle())
@@ -78,14 +75,14 @@ public class BookApiController {
                     content = @Content),
             @ApiResponse(responseCode = "404", description = "Book not found",
                     content = @Content) })
-    @GetMapping("/find/{id}")
+    @GetMapping("/books/{id}")
     public ResponseEntity<Response> findByid(@PathVariable(required = false) Long id) {
 
         Optional<Book> optionalBook = bookService.findById(id);
 
         if (optionalBook.isPresent()) {
             Book book = optionalBook.get();
-            BooKDTO booKDTO = BooKDTO.builder()
+            BookDTO booKDTO = BookDTO.builder()
                     .id(book.getId())
                     .isbn(book.getIsbn())
                     .title(book.getTitle())
@@ -128,8 +125,8 @@ public class BookApiController {
                         .build());
 
     }
-    @PostMapping("/save")
-    public ResponseEntity<Response> save(@RequestBody BooKDTO booKDTO) {
+    @PostMapping("/books")
+    public ResponseEntity<Response> save(@RequestBody BookDTO booKDTO) {
         try {
 
 
@@ -169,8 +166,8 @@ public class BookApiController {
         }
 
     }
-    @PutMapping("/update/{id}")
-    public ResponseEntity<Response> updateById(@PathVariable Long id, @RequestBody BooKDTO booKDTO) {
+    @PutMapping("/books/{id}")
+    public ResponseEntity<Response> updateById(@PathVariable Long id, @RequestBody BookDTO booKDTO) {
         Optional<Book> optionalBook = bookService.findById(id);
 
         try {
@@ -213,7 +210,7 @@ public class BookApiController {
 
 
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/books/{id}")
     public ResponseEntity<Response> deleteByid(@PathVariable Long id) {
         Optional<Book> optionalBook = bookService.findById(id);
 

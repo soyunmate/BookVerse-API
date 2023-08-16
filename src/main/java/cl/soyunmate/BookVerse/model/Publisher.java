@@ -21,8 +21,8 @@ public class Publisher {
     private String name;
     private String webSite;
     private String description;
-    @OneToMany(fetch = FetchType.EAGER, targetEntity = Book.class)
+    /*@OneToMany(fetch = FetchType.EAGER, targetEntity = Book.class)
     @JoinTable(name = "publisher_books", joinColumns = @JoinColumn(name = "publisher_id"), inverseJoinColumns = @JoinColumn(name = "book_id"))
-    private Set<Book> bookSet;
+    private Set<Book> bookSet;*/
 
 }

@@ -23,8 +23,9 @@ public class Book {
     private String title;
     @Column(unique = true)
     private String isbn;
-    @ManyToOne
-    @JoinColumn(name = "author_id")
+    @ManyToOne(targetEntity = Author.class, fetch = FetchType.EAGER)
+    /*@JoinTable(name = "author_books", joinColumns = @JoinColumn(name = "book_id"), inverseJoinColumns = @JoinColumn(name = "author_id"))*/
+    @JoinColumn(name = "author_id",nullable = false)
     private Author author;
 
     @ManyToMany(fetch = FetchType.EAGER, targetEntity = Genre.class)

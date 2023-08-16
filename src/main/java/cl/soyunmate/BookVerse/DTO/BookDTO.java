@@ -1,12 +1,6 @@
 package cl.soyunmate.BookVerse.DTO;
 
-import cl.soyunmate.BookVerse.model.Author;
-import cl.soyunmate.BookVerse.model.Genre;
-import cl.soyunmate.BookVerse.model.Publisher;
-import cl.soyunmate.BookVerse.model.Tag;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -23,8 +17,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@JsonInclude(NON_NULL)
-public class BooKDTO {
+public class BookDTO {
     private Long id;
     @NotEmpty
     private String title;

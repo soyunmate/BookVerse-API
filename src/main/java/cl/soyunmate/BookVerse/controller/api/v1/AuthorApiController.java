@@ -1,9 +1,7 @@
 package cl.soyunmate.BookVerse.controller.api.v1;
 
 import cl.soyunmate.BookVerse.DTO.AuthorDTO;
-import cl.soyunmate.BookVerse.DTO.BooKDTO;
 import cl.soyunmate.BookVerse.model.Author;
-import cl.soyunmate.BookVerse.model.Book;
 import cl.soyunmate.BookVerse.model.Response;
 import cl.soyunmate.BookVerse.service.IAuthorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,14 +13,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/v1/authors")
+@RequestMapping("/api/v1")
 public class AuthorApiController {
     @Autowired
     private IAuthorService authorService;
-    @GetMapping("/findAll")
+    @GetMapping("/authors")
     public ResponseEntity<Response> findAll() {
 
         List<Author> authorList = authorService.findAll();
@@ -34,12 +31,6 @@ public class AuthorApiController {
                         .nationality(au.getNationality())
                         .birthDate(au.getBirthDate())
                         .biography(au.getBiography())
-                        .publishedBooks(au.getPublishedBooks().stream().map(book -> BooKDTO
-                                .builder()
-                                .id(book.getId())
-                                .title(book.getTitle())
-                                .isbn(book.getIsbn())
-                                .build()).collect(Collectors.toSet()))
                 .build())
                 .toList();
 
@@ -54,7 +45,7 @@ public class AuthorApiController {
                         .build());
     }
 
-    @GetMapping("/find/{id}")
+    @GetMapping("/authors/{id}")
     public ResponseEntity<Response> findById(@PathVariable Long id) {
         Optional<Author> optionalAuthor = authorService.findById(id);
 
@@ -67,12 +58,6 @@ public class AuthorApiController {
                     .nationality(author.getNationality())
                     .birthDate(author.getBirthDate())
                     .biography(author.getBiography())
-                    .publishedBooks(author.getPublishedBooks().stream().map(book -> BooKDTO
-                            .builder()
-                            .id(book.getId())
-                            .title(book.getTitle())
-                            .isbn(book.getIsbn())
-                            .build()).collect(Collectors.toSet()))
                     .build();
 
             return ResponseEntity.ok(
@@ -94,7 +79,7 @@ public class AuthorApiController {
                         .statusCode(HttpStatus.NOT_FOUND.value())
                         .build());
     }
-    @PostMapping("/save")
+    @PostMapping("/authors")
     public ResponseEntity<Response> save(@RequestBody AuthorDTO authorDTO) {
 
         try {
@@ -104,10 +89,6 @@ public class AuthorApiController {
                     .nationality(authorDTO.getNationality())
                     .birthDate(authorDTO.getBirthDate())
                     .biography(authorDTO.getBiography())
-                    .publishedBooks(authorDTO.getPublishedBooks().stream().map(book -> Book
-                            .builder()
-                            .id(book.getId())
-                            .build()).collect(Collectors.toSet()))
                     .build();
 
             authorService.save(authorToSave);
@@ -131,7 +112,7 @@ public class AuthorApiController {
         }
 
     }
-    @PutMapping("/update/{id}")
+    @PutMapping("/authors/{id}")
     public ResponseEntity<Response> updateById(@PathVariable Long id, @RequestBody AuthorDTO authorDTO) {
         Optional<Author> optionalAuthor = authorService.findById(id);
 
@@ -143,10 +124,6 @@ public class AuthorApiController {
                 updatedAuthor.setNationality(authorDTO.getNationality());
                 updatedAuthor.setBiography(authorDTO.getBiography());
                 updatedAuthor.setNationality(authorDTO.getNationality());
-                //TODO no esta funcionando correctamente
-                updatedAuthor.setPublishedBooks(authorDTO.getPublishedBooks().stream()
-                        .map(bDTO -> Book.builder().id(bDTO.getId()).build()).collect(Collectors.toSet()));
-
                 authorService.save(updatedAuthor);
 
                 return ResponseEntity.status(HttpStatus.OK).body(Response.builder()
@@ -174,7 +151,7 @@ public class AuthorApiController {
                         .statusCode(HttpStatus.NOT_FOUND.value())
                         .build());
     }
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/authors/{id}")
     public ResponseEntity<Response> deleteById(@PathVariable Long id) {
 
         Optional<Author> optionalAuthor = authorService.findById(id);

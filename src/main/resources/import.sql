@@ -34,8 +34,8 @@ INSERT INTO books (description, isbn, language, pages, publish_date, stock, titl
 INSERT INTO books (description, isbn, language, pages, publish_date, stock, title, author_id, publisher_id) VALUES ('Descripción del libro 2', '9876543210', 'Inglés', 250, '2022-12-10', 30, 'Libro 2', 2, 1);
 
 -- Relaciones Autor-Libro
-INSERT INTO author_books (author_id, book_id) VALUES (1, 1);
-INSERT INTO author_books (author_id, book_id) VALUES (2, 2);
+-- INSERT INTO author_books (author_id, book_id) VALUES (1, 1);
+-- INSERT INTO author_books (author_id, book_id) VALUES (2, 2);
 
 -- Relaciones Libro-Género
 INSERT INTO book_genres (book_id, genre_id) VALUES (1, 1);

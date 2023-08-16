@@ -25,10 +25,10 @@ public class Author {
 
     private  String lastName;
 
-    @OneToMany(fetch = FetchType.LAZY, targetEntity = Book.class)
+    /*@OneToMany(fetch = FetchType.EAGER, targetEntity = Book.class, mappedBy = "author")
     @JoinTable(name = "author_books", joinColumns = @JoinColumn(name = "author_id"), inverseJoinColumns = @JoinColumn(name = "book_id"))
     @JsonIgnore
-    private Set<Book> publishedBooks;
+    private Set<Book> publishedBooks;*/
     private String nationality;
     private String birthDate;
     private String biography;
