@@ -10,6 +10,7 @@ public interface IGenreService {
     List<Genre> findAll();
     Optional<Genre> findById(Long id);
 
+    Optional<Genre> findByName(String name);
     void save(Genre genre);
 
     void deleteById(Long id);

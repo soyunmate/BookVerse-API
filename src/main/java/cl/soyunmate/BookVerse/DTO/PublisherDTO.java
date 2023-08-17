@@ -14,6 +14,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonInclude(NON_NULL)
 public class PublisherDTO {
 
     private Long id;

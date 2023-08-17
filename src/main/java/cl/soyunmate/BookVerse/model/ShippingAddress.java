@@ -15,9 +15,9 @@ public class ShippingAddress {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @NotBlank
+    /*@NotBlank
     @ManyToOne(fetch = FetchType.EAGER, targetEntity = UserEntity.class)
-    private UserEntity user;
+    private UserEntity user;*/
     @NotBlank
     private String name;
     @NotBlank

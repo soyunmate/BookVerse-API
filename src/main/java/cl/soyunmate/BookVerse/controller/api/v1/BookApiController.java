@@ -2,7 +2,6 @@ package cl.soyunmate.BookVerse.controller.api.v1;
 
 import cl.soyunmate.BookVerse.DTO.*;
 import cl.soyunmate.BookVerse.model.*;
-import cl.soyunmate.BookVerse.model.enums.EGenre;
 import cl.soyunmate.BookVerse.model.enums.ETag;
 import cl.soyunmate.BookVerse.service.IBookService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,7 +40,7 @@ public class BookApiController {
                                 .lastName(book.getAuthor().getLastName())
                                 .build())
                         .genre(book.getGenre().stream().map(genre -> GenreDTO.builder()
-                                        .name(EGenre.valueOf(String.valueOf(genre.getName())))
+                                        .name(genre.getName())
                                         .build())
                                 .collect(Collectors.toSet()))
                         .description(book.getDescription())
@@ -50,7 +49,7 @@ public class BookApiController {
                         .language(book.getLanguage())
                         .pages(book.getPages())
                         .tags(book.getTags().stream().map(tag -> TagDTO.builder()
-                                .name(ETag.valueOf(String.valueOf(tag.getName()))).build())
+                                .name(ETag.valueOf(java.lang.String.valueOf(tag.getName()))).build())
                                 .collect(Collectors.toSet()))
                         .stock(book.getStock())
                         .build() )
@@ -92,7 +91,7 @@ public class BookApiController {
                             .lastName(book.getAuthor().getLastName())
                             .build())
                     .genre(book.getGenre().stream().map(genre -> GenreDTO.builder()
-                                    .name(EGenre.valueOf(String.valueOf(genre.getName())))
+                                    .name(genre.getName())
                                     .build())
                             .collect(Collectors.toSet()))
                     .description(book.getDescription())
@@ -101,7 +100,7 @@ public class BookApiController {
                     .language(book.getLanguage())
                     .pages(book.getPages())
                     .tags(book.getTags().stream().map(tag -> TagDTO.builder()
-                                    .name(ETag.valueOf(String.valueOf(tag.getName()))).build())
+                                    .name(ETag.valueOf(java.lang.String.valueOf(tag.getName()))).build())
                             .collect(Collectors.toSet()))
                     .stock(book.getStock())
                     .build();

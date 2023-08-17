@@ -25,6 +25,11 @@ public class GenreServiceImpl implements IGenreService {
     }
 
     @Override
+    public Optional<Genre> findByName(String name) {
+        return genreDAO.findByName(name);
+    }
+
+    @Override
     public void save(Genre genre) {
         genreDAO.save(genre);
     }

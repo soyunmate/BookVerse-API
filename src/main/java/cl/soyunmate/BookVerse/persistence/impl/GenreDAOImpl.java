@@ -25,6 +25,11 @@ public class GenreDAOImpl implements IGenreDAO {
     }
 
     @Override
+    public Optional<Genre> findByName(String name) {
+        return genreRepository.findByName(name);
+    }
+
+    @Override
     public void save(Genre genre) {
         genreRepository.save(genre);
     }
