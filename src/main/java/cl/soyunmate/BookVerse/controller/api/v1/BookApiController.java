@@ -6,6 +6,7 @@ import cl.soyunmate.BookVerse.model.enums.ETag;
 import cl.soyunmate.BookVerse.service.IAuthorService;
 import cl.soyunmate.BookVerse.service.IBookService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -14,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,12 +31,13 @@ public class BookApiController {
     @Autowired
     private IBookService bookService;
 
-
+    @Operation(summary = "Find books with optional filters")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved books", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
     @GetMapping("/books")
-    public ResponseEntity<Response> findAll(@RequestParam(required = false, defaultValue = "") String author,
-                                            @RequestParam(required = false, defaultValue = "") String genre,
-                                            @RequestParam(required = false, defaultValue = "") String publisher,
-                                            @RequestParam(required = false, defaultValue = "") String tag,
+    public ResponseEntity<Response> findAll(@Parameter(description = "Filter by author's last name") @RequestParam(required = false, defaultValue = "") String author,
+                                            @Parameter(description = "Filter by genre name") @RequestParam(required = false, defaultValue = "") String genre,
+                                            @Parameter(description = "Filter by publisher name") @RequestParam(required = false, defaultValue = "") String publisher,
+                                            @Parameter(description = "Filter by tag name") @RequestParam(required = false, defaultValue = "") String tag,
                                             HttpServletRequest request) {
         List<Book> bookList = bookService.findAll();
         boolean passedAnyFilter = false;
@@ -106,15 +109,9 @@ public class BookApiController {
                     .build());
     }
 
-    @Operation(summary = "Get a book by its id")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Found the book",
-                    content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Book.class)) }),
-            @ApiResponse(responseCode = "400", description = "Invalid id supplied",
-                    content = @Content),
-            @ApiResponse(responseCode = "404", description = "Book not found",
-                    content = @Content) })
+    @Operation(summary = "Find book by ID")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved book", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
+    @ApiResponse(responseCode = "404", description = "Book not found", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
     @GetMapping("/books/{id}")
     public ResponseEntity<Response> findByid(@PathVariable(required = false) Long id) {
 
@@ -165,6 +162,9 @@ public class BookApiController {
                         .build());
 
     }
+    @Operation(summary = "Create a new book")
+    @ApiResponse(responseCode = "201", description = "Book Created", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
+    @ApiResponse(responseCode = "400", description = "Missing one or more required fields", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
     @PostMapping("/books")
     public ResponseEntity<Response> save(@Valid @RequestBody BookDTO booKDTO) {
         try {
@@ -204,6 +204,9 @@ public class BookApiController {
 
     }
 
+    @Operation(summary = "Update book by ID")
+    @ApiResponse(responseCode = "200", description = "Book Updated", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
+    @ApiResponse(responseCode = "404", description = "Book not found", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
     @PutMapping("/books/{id}")
     public ResponseEntity<Response> updateById(@PathVariable Long id, @Valid @RequestBody BookDTO booKDTO) {
         Optional<Book> optionalBook = bookService.findById(id);
@@ -244,6 +247,9 @@ public class BookApiController {
 
 
 
+    @Operation(summary = "Delete book by ID")
+    @ApiResponse(responseCode = "202", description = "Book Eliminated", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
+    @ApiResponse(responseCode = "404", description = "Book to delete was not found", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
     @DeleteMapping("/books/{id}")
     public ResponseEntity<Response> deleteByid(@PathVariable Long id) {
         Optional<Book> optionalBook = bookService.findById(id);
