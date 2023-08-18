@@ -13,8 +13,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-@RestController("/api/v1")
+@RestController
+@RequestMapping("/api/v1")
 public class GenreApiController {
     @Autowired
     private IGenreService genreService;
@@ -54,6 +54,15 @@ public class GenreApiController {
                     .description(genre.getDescription())
                     .icon(genre.getIcon())
                     .build();
+
+            return ResponseEntity.ok(
+                    Response.builder()
+                            .timeStamp(LocalDateTime.now())
+                            .data(Map.of("Genre", genreDTO))
+                            .message("All Genres Retrieved")
+                            .status(HttpStatus.OK)
+                            .statusCode(HttpStatus.OK.value())
+                            .build());
         }
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -88,12 +97,13 @@ public class GenreApiController {
         genreService.save(genreToSave);
 
 
-        return ResponseEntity.ok(Response.builder()
-                .timeStamp(LocalDateTime.now())
-                .message("Genre entry added")
-                .status(HttpStatus.OK)
-                .statusCode(HttpStatus.OK.value())
-                .build());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(Response.builder()
+                        .timeStamp(LocalDateTime.now())
+                        .message("Genre entry added")
+                        .status(HttpStatus.CREATED)
+                        .statusCode(HttpStatus.CREATED.value())
+                        .build());
     }
 
     @PutMapping("/genres/{id}")

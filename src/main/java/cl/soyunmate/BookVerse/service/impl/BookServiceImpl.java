@@ -1,5 +1,6 @@
 package cl.soyunmate.BookVerse.service.impl;
 
+import cl.soyunmate.BookVerse.DTO.BookSearch;
 import cl.soyunmate.BookVerse.model.*;
 import cl.soyunmate.BookVerse.persistence.IBookDAO;
 import cl.soyunmate.BookVerse.service.IBookService;
@@ -19,6 +20,7 @@ public class BookServiceImpl implements IBookService {
     public List<Book> findAll() {
         return bookDAO.findAll();
     }
+
 
     @Override
     public Optional<Book> findById(Long id) {

@@ -1,5 +1,6 @@
 package cl.soyunmate.BookVerse.service;
 
+import cl.soyunmate.BookVerse.DTO.BookSearch;
 import cl.soyunmate.BookVerse.model.*;
 
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.Set;
 
 public interface IBookService {
     List<Book> findAll();
+
     Optional<Book> findById(Long id);
     Optional<Book> findByIsbn(String isbn);
 

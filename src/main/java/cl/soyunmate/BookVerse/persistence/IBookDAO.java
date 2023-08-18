@@ -12,6 +12,7 @@ import java.util.Set;
 public interface IBookDAO {
 
     List<Book> findAll();
+
     Optional<Book> findById(Long id);
     Optional<Book> findByIsbn(String isbn);
 

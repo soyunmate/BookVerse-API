@@ -117,30 +117,21 @@ public class AuthorApiController {
         Optional<Author> optionalAuthor = authorService.findById(id);
 
         if (optionalAuthor.isPresent()) {
-            try {
-                Author updatedAuthor = optionalAuthor.get();
-                updatedAuthor.setFirstName(authorDTO.getFirstName());
-                updatedAuthor.setLastName(authorDTO.getLastName());
-                updatedAuthor.setNationality(authorDTO.getNationality());
-                updatedAuthor.setBiography(authorDTO.getBiography());
-                updatedAuthor.setNationality(authorDTO.getNationality());
-                authorService.save(updatedAuthor);
+            Author updatedAuthor = optionalAuthor.get();
+            updatedAuthor.setFirstName(authorDTO.getFirstName());
+            updatedAuthor.setLastName(authorDTO.getLastName());
+            updatedAuthor.setNationality(authorDTO.getNationality());
+            updatedAuthor.setBiography(authorDTO.getBiography());
+            updatedAuthor.setNationality(authorDTO.getNationality());
+            authorService.save(updatedAuthor);
 
-                return ResponseEntity.status(HttpStatus.OK).body(Response.builder()
+            return ResponseEntity.status(HttpStatus.OK).body(Response.builder()
                         .timeStamp(LocalDateTime.now())
                         .message("Author Updated")
                         .status(HttpStatus.OK)
                         .statusCode(HttpStatus.OK.value())
                         .build());
-            } catch (Exception e) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(Response.builder()
-                                .timeStamp(LocalDateTime.now())
-                                .message(e.getMessage())
-                                .status(HttpStatus.BAD_REQUEST)
-                                .statusCode(HttpStatus.BAD_REQUEST.value())
-                                .build());
-            }
+
         }
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -151,18 +142,19 @@ public class AuthorApiController {
                         .statusCode(HttpStatus.NOT_FOUND.value())
                         .build());
     }
+
     @DeleteMapping("/authors/{id}")
     public ResponseEntity<Response> deleteById(@PathVariable Long id) {
 
         Optional<Author> optionalAuthor = authorService.findById(id);
-        //TODO cambiar el "no content" por otro httpstatus mejor
+
         if (optionalAuthor.isPresent()) {
             authorService.deleteById(optionalAuthor.get().getId());
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(Response.builder()
+            return ResponseEntity.status(HttpStatus.OK).body(Response.builder()
                     .timeStamp(LocalDateTime.now())
                     .message("Author Eliminated")
-                    .status(HttpStatus.NO_CONTENT)
-                    .statusCode(HttpStatus.NO_CONTENT.value())
+                    .status(HttpStatus.OK)
+                    .statusCode(HttpStatus.OK.value())
                     .build());
         }
 
