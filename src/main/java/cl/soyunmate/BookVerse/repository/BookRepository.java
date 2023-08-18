@@ -14,7 +14,6 @@ import java.util.Set;
 public interface BookRepository extends JpaRepository<Book, Long> {
     Set<Book> findByAuthor(Author author);
 
-
     @Query("SELECT DISTINCT b FROM Book b JOIN b.genre g WHERE g = :genre")
     Set<Book> findByGenre(@Param("genre") Genre genre);
 
