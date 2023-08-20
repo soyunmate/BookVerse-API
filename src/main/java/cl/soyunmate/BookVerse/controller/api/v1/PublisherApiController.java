@@ -1,9 +1,14 @@
 package cl.soyunmate.BookVerse.controller.api.v1;
 
-import cl.soyunmate.BookVerse.DTO.PublisherDTO;
+import cl.soyunmate.BookVerse.DTO.*;
+import cl.soyunmate.BookVerse.model.Book;
 import cl.soyunmate.BookVerse.model.Publisher;
 import cl.soyunmate.BookVerse.model.Response;
+import cl.soyunmate.BookVerse.model.enums.ETag;
+import cl.soyunmate.BookVerse.service.IBookService;
 import cl.soyunmate.BookVerse.service.IPublisherService;
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +19,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -21,9 +28,31 @@ public class PublisherApiController {
     @Autowired
     private IPublisherService publisherService;
 
+    @Autowired
+    private IBookService bookService;
+
     @GetMapping("/publishers")
-    public ResponseEntity<Response> findAll() {
+    public ResponseEntity<Response> findAll(@Parameter(description = "Filter by publisher name") @RequestParam(required = false, defaultValue = "") String publisher,
+                                            HttpServletRequest request) {
         List<Publisher> publisherList = publisherService.findAll();
+
+        boolean passedAnyFilter = false;
+
+        if (!publisher.isBlank()) {
+            publisherList = publisherList.stream().filter(pb -> pb.getName().toLowerCase().equals(publisher)).toList();
+            passedAnyFilter = true;
+        }
+
+        if (!passedAnyFilter && !request.getParameterMap().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Response.builder()
+                            .timeStamp(LocalDateTime.now())
+                            .message("Invalid Query parameter")
+                            .status(HttpStatus.BAD_REQUEST)
+                            .statusCode(HttpStatus.BAD_REQUEST.value())
+                            .build());
+        }
+
         List<PublisherDTO> publisherDTOList= publisherList.stream().map(pb -> PublisherDTO
                 .builder()
                         .id(pb.getId())
@@ -77,6 +106,56 @@ public class PublisherApiController {
                         .statusCode(HttpStatus.NOT_FOUND.value())
                         .build());
     }
+
+    @GetMapping("/publishers/{id}/books")
+    public ResponseEntity<Response> findPublisherBooks(@PathVariable Long id) {
+        Optional<Publisher> optionalPublisher = publisherService.findById(id);
+
+        if (optionalPublisher.isPresent()) {
+            Set<Book> bookSet = bookService.findByPublisher(optionalPublisher.get());
+            List<BookDTO> bookDTOList = bookSet.stream().map(book -> BookDTO.builder()
+                    .id(book.getId())
+                    .isbn(book.getIsbn())
+                    .title(book.getTitle())
+                    .author(AuthorDTO.builder()
+                            .id(book.getAuthor().getId())
+                            .firstName(book.getAuthor().getFirstName())
+                            .lastName(book.getAuthor().getLastName())
+                            .build())
+                    .genre(book.getGenre().stream().map(g -> GenreDTO.builder()
+                                    .name(g.getName())
+                                    .build())
+                            .collect(Collectors.toSet()))
+                    .description(book.getDescription())
+                    .publishDate(book.getPublishDate())
+                    .publisher(PublisherDTO.builder().name(book.getPublisher().getName()).build())
+                    .language(book.getLanguage())
+                    .pages(book.getPages())
+                    .tags(book.getTags().stream().map(tg -> TagDTO.builder()
+                                    .name(ETag.valueOf(java.lang.String.valueOf(tg.getName()))).build())
+                            .collect(Collectors.toSet()))
+                    .stock(book.getStock())
+                    .build()).toList();
+
+            return ResponseEntity.ok(
+                    Response.builder()
+                            .timeStamp(LocalDateTime.now())
+                            .data(Map.of("books", bookDTOList))
+                            .message( "Publisher´s books retrieved")
+                            .status(HttpStatus.OK)
+                            .statusCode(HttpStatus.OK.value())
+                            .build());
+        }
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Response.builder()
+                        .timeStamp(LocalDateTime.now())
+                        .message("Publisher Not Found")
+                        .status(HttpStatus.NOT_FOUND)
+                        .statusCode(HttpStatus.NOT_FOUND.value())
+                        .build());
+    }
+
     @PostMapping("/publishers")
     public ResponseEntity<Response> save(@RequestBody PublisherDTO publisherDTO) {
 

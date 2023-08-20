@@ -1,8 +1,12 @@
 package cl.soyunmate.BookVerse.controller.api.v1;
 
-import cl.soyunmate.BookVerse.DTO.GenreDTO;
+import cl.soyunmate.BookVerse.DTO.*;
+import cl.soyunmate.BookVerse.model.Book;
 import cl.soyunmate.BookVerse.model.Genre;
+import cl.soyunmate.BookVerse.model.Publisher;
 import cl.soyunmate.BookVerse.model.Response;
+import cl.soyunmate.BookVerse.model.enums.ETag;
+import cl.soyunmate.BookVerse.service.IBookService;
 import cl.soyunmate.BookVerse.service.IGenreService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,11 +17,18 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/api/v1")
 public class GenreApiController {
     @Autowired
     private IGenreService genreService;
+
+    @Autowired
+    private IBookService bookService;
+
     @GetMapping("/genres")
     public ResponseEntity<Response> findAll() {
         List<Genre> genreList = genreService.findAll();
@@ -60,6 +71,55 @@ public class GenreApiController {
                             .timeStamp(LocalDateTime.now())
                             .data(Map.of("Genre", genreDTO))
                             .message("All Genres Retrieved")
+                            .status(HttpStatus.OK)
+                            .statusCode(HttpStatus.OK.value())
+                            .build());
+        }
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Response.builder()
+                        .timeStamp(LocalDateTime.now())
+                        .message("Genre Not Found")
+                        .status(HttpStatus.NOT_FOUND)
+                        .statusCode(HttpStatus.NOT_FOUND.value())
+                        .build());
+    }
+
+    @GetMapping("/genres/{name}/books")
+    public ResponseEntity<Response> findPublisherBooks(@PathVariable String name) {
+        Optional<Genre> optionalGenre = genreService.findByName(name);
+
+        if (optionalGenre.isPresent()) {
+            Set<Book> bookSet = bookService.findByGenre(optionalGenre.get());
+            List<BookDTO> bookDTOList = bookSet.stream().map(book -> BookDTO.builder()
+                    .id(book.getId())
+                    .isbn(book.getIsbn())
+                    .title(book.getTitle())
+                    .author(AuthorDTO.builder()
+                            .id(book.getAuthor().getId())
+                            .firstName(book.getAuthor().getFirstName())
+                            .lastName(book.getAuthor().getLastName())
+                            .build())
+                    .genre(book.getGenre().stream().map(g -> GenreDTO.builder()
+                                    .name(g.getName())
+                                    .build())
+                            .collect(Collectors.toSet()))
+                    .description(book.getDescription())
+                    .publishDate(book.getPublishDate())
+                    .publisher(PublisherDTO.builder().name(book.getPublisher().getName()).build())
+                    .language(book.getLanguage())
+                    .pages(book.getPages())
+                    .tags(book.getTags().stream().map(tg -> TagDTO.builder()
+                                    .name(ETag.valueOf(java.lang.String.valueOf(tg.getName()))).build())
+                            .collect(Collectors.toSet()))
+                    .stock(book.getStock())
+                    .build()).toList();
+
+            return ResponseEntity.ok(
+                    Response.builder()
+                            .timeStamp(LocalDateTime.now())
+                            .data(Map.of("books", bookDTOList))
+                            .message( "Genres´s books retrieved")
                             .status(HttpStatus.OK)
                             .statusCode(HttpStatus.OK.value())
                             .build());

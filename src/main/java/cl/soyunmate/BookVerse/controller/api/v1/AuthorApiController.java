@@ -48,6 +48,7 @@ public class AuthorApiController {
 
         if (!author.isBlank()) {
             authorList = authorList.stream().filter(au -> au.getLastName().toLowerCase().equals(author)).toList();
+           passedAnyFilter = true;
         }
 
         if (!passedAnyFilter && !request.getParameterMap().isEmpty()) {
