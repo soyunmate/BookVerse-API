@@ -1,5 +1,7 @@
 package cl.soyunmate.BookVerse.DTO;
 
+import cl.soyunmate.BookVerse.model.Genre;
+import cl.soyunmate.BookVerse.model.Tag;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -10,6 +12,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
@@ -18,6 +21,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonInclude(NON_NULL)
 public class BookDTO {
     private Long id;
     @NotBlank
@@ -25,22 +29,28 @@ public class BookDTO {
     @NotBlank
     private String isbn;
     @NotNull
-    private AuthorDTO author;
+    private Long authorID;
+
+    private String author;
     @NotEmpty
-    private Set<GenreDTO> genre;
+    private Set<Long> genreIDs;
+
+    private List<String> genres;
 
     private String description;
 
     private LocalDate publishDate;
     @NotNull
-    private PublisherDTO publisher;
+    private Long publisherID;
+    private String publisher;
 
     @NotBlank
     private String language;
 
     private Integer pages;
     @NotEmpty
-    private Set<TagDTO> tags;
+    private Set<Long> tagsIDs;
+    private List<String> tags;
 
     private Integer stock;
 }

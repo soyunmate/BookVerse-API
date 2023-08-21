@@ -5,6 +5,8 @@ import cl.soyunmate.BookVerse.model.*;
 import cl.soyunmate.BookVerse.model.enums.ETag;
 import cl.soyunmate.BookVerse.service.IAuthorService;
 import cl.soyunmate.BookVerse.service.IBookService;
+import cl.soyunmate.BookVerse.service.IGenreService;
+import cl.soyunmate.BookVerse.service.ITagService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -30,6 +32,12 @@ import java.util.stream.Collectors;
 public class BookApiController {
     @Autowired
     private IBookService bookService;
+
+    @Autowired
+    private IGenreService genreService;
+
+    @Autowired
+    private ITagService tagService;
 
     @Operation(summary = "Find books with optional filters")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved books", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
@@ -83,17 +91,14 @@ public class BookApiController {
                                 .firstName(book.getAuthor().getFirstName())
                                 .lastName(book.getAuthor().getLastName())
                                 .build())
-                        .genre(book.getGenre().stream().map(g -> GenreDTO.builder()
-                                        .name(g.getName())
-                                        .build())
+                        .genre(book.getGenre().stream().map(Genre::getName)
                                 .collect(Collectors.toSet()))
                         .description(book.getDescription())
                         .publishDate(book.getPublishDate())
                         .publisher(PublisherDTO.builder().name(book.getPublisher().getName()).build())
                         .language(book.getLanguage())
                         .pages(book.getPages())
-                        .tags(book.getTags().stream().map(tg -> TagDTO.builder()
-                                .name(ETag.valueOf(java.lang.String.valueOf(tg.getName()))).build())
+                        .tags(book.getTags().stream().map(tg -> tg.getName().name())
                                 .collect(Collectors.toSet()))
                         .stock(book.getStock())
                         .build() )
@@ -128,17 +133,14 @@ public class BookApiController {
                             .firstName(book.getAuthor().getFirstName())
                             .lastName(book.getAuthor().getLastName())
                             .build())
-                    .genre(book.getGenre().stream().map(genre -> GenreDTO.builder()
-                                    .name(genre.getName())
-                                    .build())
+                    .genre(book.getGenre().stream().map(Genre::getName)
                             .collect(Collectors.toSet()))
                     .description(book.getDescription())
                     .publishDate(book.getPublishDate())
                     .publisher(PublisherDTO.builder().name(book.getPublisher().getName()).build())
                     .language(book.getLanguage())
                     .pages(book.getPages())
-                    .tags(book.getTags().stream().map(tag -> TagDTO.builder()
-                                    .name(ETag.valueOf(java.lang.String.valueOf(tag.getName()))).build())
+                    .tags(book.getTags().stream().map(tg -> tg.getName().name())
                             .collect(Collectors.toSet()))
                     .stock(book.getStock())
                     .build();
@@ -172,15 +174,30 @@ public class BookApiController {
                     .isbn(booKDTO.getIsbn())
                     .title(booKDTO.getTitle())
                     .author(Author.builder().id(booKDTO.getAuthor().getId()).build())
-                    .genre(booKDTO.getGenre().stream().map(genre -> Genre.builder().id(genre.getId()).build()).collect(Collectors.toSet()))
+                    .genre(booKDTO.getGenre().stream().map(genre -> Genre.builder().name(genre.toUpperCase()).build()).collect(Collectors.toSet()))
                     .description(booKDTO.getDescription())
                     .publishDate(booKDTO.getPublishDate())
                     .publisher(Publisher.builder().id(booKDTO.getPublisher().getId()).build())
                     .language(booKDTO.getLanguage())
                     .pages(booKDTO.getPages())
-                    .tags(booKDTO.getTags().stream().map(tag -> Tag.builder().id(tag.getId()).build()).collect(Collectors.toSet()))
+                    .tags(booKDTO.getTags().stream().map(tag -> Tag.builder().name(ETag.valueOf(tag)).build()).collect(Collectors.toSet()))
                     .stock(booKDTO.getStock())
                     .build();
+
+            bookToSave.getGenre().stream().map( g -> {
+                if (genreService.findByName(g.getName()).isEmpty()) {
+                    genreService.save(g);
+                }
+                return null;
+            });
+
+            bookToSave.getTags().stream().map( tg -> {
+                if (tagService.findByName(tg.getName()).isEmpty()) {
+                    tagService.save(tg);
+                }
+                return null;
+            });
+
 
             bookService.save(bookToSave);
 
@@ -195,7 +212,7 @@ public class BookApiController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Response.builder()
                             .timeStamp(LocalDateTime.now())
-                            .message("Missing one or more required fields")
+                            .message("Missing one or more required fields" + e.getMessage())
                             .status(HttpStatus.BAD_REQUEST)
                             .statusCode(HttpStatus.BAD_REQUEST.value())
                             .build());
@@ -217,13 +234,13 @@ public class BookApiController {
                 updatedBook.setAuthor(Author.builder().id(booKDTO.getAuthor().getId()).build());
                 updatedBook.setDescription(booKDTO.getDescription());
                 updatedBook.setIsbn(booKDTO.getIsbn());
-                updatedBook.setGenre(booKDTO.getGenre().stream().map(genre -> Genre.builder().id(genre.getId()).build()).collect(Collectors.toSet()));
+                updatedBook.setGenre(booKDTO.getGenre().stream().map(genre -> Genre.builder().name(genre).build()).collect(Collectors.toSet()));
                 updatedBook.setLanguage(booKDTO.getLanguage());
                 updatedBook.setPublishDate(booKDTO.getPublishDate());
                 updatedBook.setPublisher(Publisher.builder().id(booKDTO.getPublisher().getId()).build());
                 updatedBook.setStock(booKDTO.getStock());
                 updatedBook.setPages(booKDTO.getPages());
-                updatedBook.setTags(booKDTO.getTags().stream().map(tag -> Tag.builder().id(tag.getId()).build()).collect(Collectors.toSet()));
+                updatedBook.setTags(booKDTO.getTags().stream().map(tag -> Tag.builder().name(ETag.valueOf(tag)).build()).collect(Collectors.toSet()));
 
                 bookService.save(updatedBook);
 

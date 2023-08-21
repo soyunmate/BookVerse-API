@@ -3,6 +3,7 @@ package cl.soyunmate.BookVerse.controller.api.v1;
 import cl.soyunmate.BookVerse.DTO.*;
 import cl.soyunmate.BookVerse.model.Author;
 import cl.soyunmate.BookVerse.model.Book;
+import cl.soyunmate.BookVerse.model.Genre;
 import cl.soyunmate.BookVerse.model.Response;
 import cl.soyunmate.BookVerse.model.enums.ETag;
 import cl.soyunmate.BookVerse.service.IAuthorService;
@@ -140,17 +141,14 @@ public class AuthorApiController {
                                     .firstName(book.getAuthor().getFirstName())
                                     .lastName(book.getAuthor().getLastName())
                                     .build())
-                            .genre(book.getGenre().stream().map(g -> GenreDTO.builder()
-                                            .name(g.getName())
-                                            .build())
+                            .genre(book.getGenre().stream().map(Genre::getName)
                                     .collect(Collectors.toSet()))
                             .description(book.getDescription())
                             .publishDate(book.getPublishDate())
                             .publisher(PublisherDTO.builder().name(book.getPublisher().getName()).build())
                             .language(book.getLanguage())
                             .pages(book.getPages())
-                            .tags(book.getTags().stream().map(tg -> TagDTO.builder()
-                                            .name(ETag.valueOf(java.lang.String.valueOf(tg.getName()))).build())
+                            .tags(book.getTags().stream().map(tg -> tg.getName().name())
                                     .collect(Collectors.toSet()))
                             .stock(book.getStock())
                             .build()

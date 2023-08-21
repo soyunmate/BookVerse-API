@@ -1,6 +1,7 @@
 package cl.soyunmate.BookVerse.persistence.impl;
 
 import cl.soyunmate.BookVerse.model.Tag;
+import cl.soyunmate.BookVerse.model.enums.ETag;
 import cl.soyunmate.BookVerse.persistence.ITagDAO;
 import cl.soyunmate.BookVerse.repository.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,11 @@ public class TagDAOImpl implements ITagDAO {
     @Override
     public Optional<Tag> findById(Long id) {
         return tagRepository.findById(id);
+    }
+
+    @Override
+    public Optional<Tag> findByName(ETag name) {
+        return tagRepository.findByName(name);
     }
 
     @Override
