@@ -14,10 +14,11 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "genres")
 public class Genre {
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @NotBlank
-    @Id
+
     @Column(unique = true)
     private String name;
     private String description;

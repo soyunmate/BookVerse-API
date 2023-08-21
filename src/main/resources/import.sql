@@ -61,15 +61,14 @@ INSERT INTO books (description, isbn, language, pages, publish_date, stock, titl
 -- Relaciones Libro-Género
 INSERT INTO book_genres (book_id, genre_id) VALUES (1, 1);
 INSERT INTO book_genres (book_id, genre_id) VALUES (1, 2);
-INSERT INTO book_genres (book_id, genre_id) VALUES (2, 2);
 
 -- Libro 1
-INSERT INTO book_genres (book_id, genre_id) VALUES (1, 3); -- Ciencia Ficción
-INSERT INTO book_genres (book_id, genre_id) VALUES (1, 6); -- Romance
+INSERT INTO book_genres (book_id, genre_id) VALUES (1, 3);
+INSERT INTO book_genres (book_id, genre_id) VALUES (1, 6);
 
 -- Libro 2
-INSERT INTO book_genres (book_id, genre_id) VALUES (2, 2); -- Fantasía
-INSERT INTO book_genres (book_id, genre_id) VALUES (2, 8); -- Histórica
+INSERT INTO book_genres (book_id, genre_id) VALUES (2, 2);
+INSERT INTO book_genres (book_id, genre_id) VALUES (2, 8);
 
 -- Libro 3
 INSERT INTO book_genres (book_id, genre_id) VALUES (3, 1);
@@ -88,16 +87,13 @@ INSERT INTO book_genres (book_id, genre_id) VALUES (6, 7);
 INSERT INTO book_genres (book_id, genre_id) VALUES (6, 16);
 
 -- Libro 7
-INSERT INTO book_genres (book_id, genre_id) VALUES (7, 11); -
+INSERT INTO book_genres (book_id, genre_id) VALUES (7, 11);
 INSERT INTO book_genres (book_id, genre_id) VALUES (7, 14);
 
 
 
 
 -- Relaciones Libro-Etiqueta
-INSERT INTO book_tags (book_id, tag_id) VALUES (1, 1);
-INSERT INTO book_tags (book_id, tag_id) VALUES (1, 2);
-INSERT INTO book_tags (book_id, tag_id) VALUES (2, 1);
 
 -- Libro 1
 INSERT INTO book_tags (book_id, tag_id) VALUES (1, 1);

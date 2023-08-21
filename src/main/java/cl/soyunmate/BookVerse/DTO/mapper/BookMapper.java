@@ -5,9 +5,10 @@ import cl.soyunmate.BookVerse.DTO.BookDTO;
 import cl.soyunmate.BookVerse.DTO.PublisherDTO;
 import cl.soyunmate.BookVerse.model.*;
 import cl.soyunmate.BookVerse.model.enums.ETag;
+import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
-
+@Component
 public class BookMapper {
 
     public BookDTO toDto(Book book) {

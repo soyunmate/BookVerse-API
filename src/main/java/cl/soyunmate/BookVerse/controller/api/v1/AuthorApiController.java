@@ -1,6 +1,8 @@
 package cl.soyunmate.BookVerse.controller.api.v1;
 
 import cl.soyunmate.BookVerse.DTO.*;
+import cl.soyunmate.BookVerse.DTO.mapper.AuthorMapper;
+import cl.soyunmate.BookVerse.DTO.mapper.ResponseMapper;
 import cl.soyunmate.BookVerse.model.Author;
 import cl.soyunmate.BookVerse.model.Book;
 import cl.soyunmate.BookVerse.model.Genre;
@@ -34,8 +36,11 @@ public class AuthorApiController {
     @Autowired
     private IAuthorService authorService;
 
-    @Autowired
-    private IBookService bookService;
+   @Autowired
+   private AuthorMapper authorMapper;
+
+   @Autowired
+   private ResponseMapper responseMapper;
 
     @Operation(summary = "Find authors with filters")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved authors", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
@@ -53,35 +58,23 @@ public class AuthorApiController {
         }
 
         if (!passedAnyFilter && !request.getParameterMap().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Response.builder()
-                            .timeStamp(LocalDateTime.now())
-                            .message("Invalid Query parameter")
-                            .status(HttpStatus.BAD_REQUEST)
-                            .statusCode(HttpStatus.BAD_REQUEST.value())
-                            .build());
+
+            return  ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(responseMapper.toResponse(
+                            null,
+                            "Invalid Query Parameter",
+                            "Author",
+                            HttpStatus.BAD_REQUEST));
+
         }
 
-        List<AuthorDTO> authorDTOList = authorList.stream().map( au -> AuthorDTO
-                        .builder()
-                        .id(au.getId())
-                        .firstName(au.getFirstName())
-                        .lastName(au.getLastName())
-                        .nationality(au.getNationality())
-                        .birthDate(au.getBirthDate())
-                        .biography(au.getBiography())
-                .build())
-                .toList();
+        List<AuthorDTO> authorDTOList = authorList.stream().map( au -> authorMapper.toDto(au)).toList();
 
+        return  ResponseEntity.ok(responseMapper.toResponse(authorDTOList,
+                "All Authors retrieved",
+                "Author(s)",
+                HttpStatus.OK));
 
-        return ResponseEntity.ok(
-                Response.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .data(Map.of("books", authorDTOList))
-                        .message("All Books Authors Retrieved")
-                        .status(HttpStatus.OK)
-                        .statusCode(HttpStatus.OK.value())
-                        .build());
     }
 
     @Operation(summary = "Find author by ID")
@@ -93,85 +86,23 @@ public class AuthorApiController {
 
         if (optionalAuthor.isPresent()) {
             Author author = optionalAuthor.get();
-            AuthorDTO authorDTO = AuthorDTO.builder()
-                    .id(author.getId())
-                    .firstName(author.getFirstName())
-                    .lastName(author.getLastName())
-                    .nationality(author.getNationality())
-                    .birthDate(author.getBirthDate())
-                    .biography(author.getBiography())
-                    .build();
+            AuthorDTO authorDTO = authorMapper.toDto(author);
 
-            return ResponseEntity.ok(
-                    Response.builder()
-                            .timeStamp(LocalDateTime.now())
-                            .data(Map.of("Author", authorDTO))
-                            .message("Author Retrieved")
-                            .status(HttpStatus.OK)
-                            .statusCode(HttpStatus.OK.value())
-                            .build());
+            return  ResponseEntity.ok(responseMapper.toResponse(authorDTO,
+                    "Authors retrieved",
+                    "Author",
+                    HttpStatus.OK));
 
         }
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Response.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .message("Author Not Found")
-                        .status(HttpStatus.NOT_FOUND)
-                        .statusCode(HttpStatus.NOT_FOUND.value())
-                        .build());
+        return  ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(responseMapper.toResponse(
+                        null,
+                        "Author not found",
+                        "Author",
+                        HttpStatus.NOT_FOUND));
     }
 
-    @Operation(summary = "Find books by author ID")
-    @ApiResponse(responseCode = "200", description = "Successfully retrieved author's books", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
-    @ApiResponse(responseCode = "404", description = "Author not found", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
-    @GetMapping("/authors/{id}/books")
-    public ResponseEntity<Response> findAuthorBooks(@Parameter(description = "ID of the author to get books from") @PathVariable Long id) {
-        Optional<Author> optionalAuthor = authorService.findById(id);
-
-        if (optionalAuthor.isPresent()) {
-            Set<Book> authorBooks = bookService.findByAuthor(optionalAuthor.get());
-            List<BookDTO> bookDTOList = authorBooks.stream().map(
-                    book -> BookDTO.builder()
-                            .id(book.getId())
-                            .isbn(book.getIsbn())
-                            .title(book.getTitle())
-                            .author(AuthorDTO.builder()
-                                    .id(book.getAuthor().getId())
-                                    .firstName(book.getAuthor().getFirstName())
-                                    .lastName(book.getAuthor().getLastName())
-                                    .build())
-                            .genre(book.getGenre().stream().map(Genre::getName)
-                                    .collect(Collectors.toSet()))
-                            .description(book.getDescription())
-                            .publishDate(book.getPublishDate())
-                            .publisher(PublisherDTO.builder().name(book.getPublisher().getName()).build())
-                            .language(book.getLanguage())
-                            .pages(book.getPages())
-                            .tags(book.getTags().stream().map(tg -> tg.getName().name())
-                                    .collect(Collectors.toSet()))
-                            .stock(book.getStock())
-                            .build()
-                    ).toList();
-
-            return ResponseEntity.ok(
-                    Response.builder()
-                            .timeStamp(LocalDateTime.now())
-                            .data(Map.of("books", bookDTOList))
-                            .message( "Author´s books retrieved")
-                            .status(HttpStatus.OK)
-                            .statusCode(HttpStatus.OK.value())
-                            .build());
-        }
-
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Response.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .message("Author Not Found")
-                        .status(HttpStatus.NOT_FOUND)
-                        .statusCode(HttpStatus.NOT_FOUND.value())
-                        .build());
-    }
 
     @Operation(summary = "Create a new author")
     @ApiResponse(responseCode = "201", description = "Author Created", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
@@ -180,31 +111,23 @@ public class AuthorApiController {
     public ResponseEntity<Response> save( @Valid @RequestBody AuthorDTO authorDTO) {
 
         try {
-            Author authorToSave = Author.builder()
-                    .firstName(authorDTO.getFirstName())
-                    .lastName(authorDTO.getLastName())
-                    .nationality(authorDTO.getNationality())
-                    .birthDate(authorDTO.getBirthDate())
-                    .biography(authorDTO.getBiography())
-                    .build();
+            Author authorToSave = authorMapper.toEntity(authorDTO);
 
             authorService.save(authorToSave);
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(Response.builder()
-                            .timeStamp(LocalDateTime.now())
-                            .message("Author Created")
-                            .status(HttpStatus.CREATED)
-                            .statusCode(HttpStatus.CREATED.value())
-                            .build());
+            return  ResponseEntity.status(HttpStatus.CREATED)
+                    .body(responseMapper.toResponse(
+                            null,
+                            "Author Entry added",
+                            "Author",
+                            HttpStatus.CREATED));
 
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Response.builder()
-                            .timeStamp(LocalDateTime.now())
-                            .message("Missing one or more required fields")
-                            .status(HttpStatus.BAD_REQUEST)
-                            .statusCode(HttpStatus.BAD_REQUEST.value())
-                            .build());
+            return  ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(responseMapper.toResponse(
+                            null,
+                            "Missing one or more required fields",
+                            "Author",
+                            HttpStatus.BAD_REQUEST));
 
         }
 
@@ -220,29 +143,23 @@ public class AuthorApiController {
 
         if (optionalAuthor.isPresent()) {
             Author updatedAuthor = optionalAuthor.get();
-            updatedAuthor.setFirstName(authorDTO.getFirstName());
-            updatedAuthor.setLastName(authorDTO.getLastName());
-            updatedAuthor.setNationality(authorDTO.getNationality());
-            updatedAuthor.setBiography(authorDTO.getBiography());
-            updatedAuthor.setNationality(authorDTO.getNationality());
-            authorService.save(updatedAuthor);
+            Author mappedAuthor = authorMapper.toEntity(authorDTO);
+            mappedAuthor.setId(updatedAuthor.getId());
+            authorService.save(mappedAuthor);
 
-            return ResponseEntity.status(HttpStatus.OK).body(Response.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .message("Author Updated")
-                        .status(HttpStatus.OK)
-                        .statusCode(HttpStatus.OK.value())
-                        .build());
+            return  ResponseEntity.ok(responseMapper.toResponse(null,
+                    "Authors Updated",
+                    "Author",
+                    HttpStatus.OK));
 
         }
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Response.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .message("Author Not Found")
-                        .status(HttpStatus.NOT_FOUND)
-                        .statusCode(HttpStatus.NOT_FOUND.value())
-                        .build());
+        return  ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(responseMapper.toResponse(
+                        null,
+                        "Author not found",
+                        "Author",
+                        HttpStatus.NOT_FOUND));
     }
 
     @Operation(summary = "Delete author by ID")
@@ -255,21 +172,18 @@ public class AuthorApiController {
 
         if (optionalAuthor.isPresent()) {
             authorService.deleteById(optionalAuthor.get().getId());
-            return ResponseEntity.status(HttpStatus.OK).body(Response.builder()
-                    .timeStamp(LocalDateTime.now())
-                    .message("Author Eliminated")
-                    .status(HttpStatus.OK)
-                    .statusCode(HttpStatus.OK.value())
-                    .build());
+            return  ResponseEntity.ok(responseMapper.toResponse(null,
+                    "Authors Eliminated",
+                    "Author",
+                    HttpStatus.OK));
         }
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Response.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .message("Author Not Found")
-                        .status(HttpStatus.NOT_FOUND)
-                        .statusCode(HttpStatus.NOT_FOUND.value())
-                        .build());
+        return  ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(responseMapper.toResponse(
+                        null,
+                        "Author not found",
+                        "Author",
+                        HttpStatus.NOT_FOUND));
     }
 
 }

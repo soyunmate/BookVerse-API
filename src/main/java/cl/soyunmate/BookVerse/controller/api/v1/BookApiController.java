@@ -1,6 +1,8 @@
 package cl.soyunmate.BookVerse.controller.api.v1;
 
 import cl.soyunmate.BookVerse.DTO.*;
+import cl.soyunmate.BookVerse.DTO.mapper.BookMapper;
+import cl.soyunmate.BookVerse.DTO.mapper.ResponseMapper;
 import cl.soyunmate.BookVerse.model.*;
 import cl.soyunmate.BookVerse.model.enums.ETag;
 import cl.soyunmate.BookVerse.service.IAuthorService;
@@ -25,6 +27,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -32,12 +35,10 @@ import java.util.stream.Collectors;
 public class BookApiController {
     @Autowired
     private IBookService bookService;
-
     @Autowired
-    private IGenreService genreService;
-
+    private BookMapper bookMapper;
     @Autowired
-    private ITagService tagService;
+    private ResponseMapper responseMapper;
 
     @Operation(summary = "Find books with optional filters")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved books", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
@@ -72,46 +73,20 @@ public class BookApiController {
 
         if (!passedAnyFilter && !request.getParameterMap().isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Response.builder()
-                            .timeStamp(LocalDateTime.now())
-                            .message("Invalid Query parameter")
-                            .status(HttpStatus.BAD_REQUEST)
-                            .statusCode(HttpStatus.BAD_REQUEST.value())
-                            .build());
+                    .body(responseMapper.toResponse(null,
+                            "Invalid Query parameter",
+                            "Book(s)",
+                            HttpStatus.BAD_REQUEST));
         }
 
+        List<BookDTO> bookDTOList = bookList.stream().map(book -> bookMapper.toDto(book)).toList();
 
-        List<BookDTO> bookDTOList = bookList.stream()
-                .map(book -> BookDTO.builder()
-                        .id(book.getId())
-                        .isbn(book.getIsbn())
-                        .title(book.getTitle())
-                        .author(AuthorDTO.builder()
-                                .id(book.getAuthor().getId())
-                                .firstName(book.getAuthor().getFirstName())
-                                .lastName(book.getAuthor().getLastName())
-                                .build())
-                        .genre(book.getGenre().stream().map(Genre::getName)
-                                .collect(Collectors.toSet()))
-                        .description(book.getDescription())
-                        .publishDate(book.getPublishDate())
-                        .publisher(PublisherDTO.builder().name(book.getPublisher().getName()).build())
-                        .language(book.getLanguage())
-                        .pages(book.getPages())
-                        .tags(book.getTags().stream().map(tg -> tg.getName().name())
-                                .collect(Collectors.toSet()))
-                        .stock(book.getStock())
-                        .build() )
-                .toList();
-
-            return ResponseEntity.ok(
-                    Response.builder()
-                            .timeStamp(LocalDateTime.now())
-                            .data(Map.of("books", bookDTOList))
-                            .message( passedAnyFilter ? "Filtered list retrieved":"All Books Retrieved")
-                            .status(HttpStatus.OK)
-                            .statusCode(HttpStatus.OK.value())
-                    .build());
+        return  ResponseEntity.ok(
+                responseMapper.toResponse(
+                        bookDTOList,
+                        passedAnyFilter ? "Filtered list retrieved":"All Books Retrieved",
+                        "Book(s)",
+                        HttpStatus.OK));
     }
 
     @Operation(summary = "Find book by ID")
@@ -124,98 +99,91 @@ public class BookApiController {
 
         if (optionalBook.isPresent()) {
             Book book = optionalBook.get();
-            BookDTO booKDTO = BookDTO.builder()
-                    .id(book.getId())
-                    .isbn(book.getIsbn())
-                    .title(book.getTitle())
-                    .author(AuthorDTO.builder()
-                            .id(book.getAuthor().getId())
-                            .firstName(book.getAuthor().getFirstName())
-                            .lastName(book.getAuthor().getLastName())
-                            .build())
-                    .genre(book.getGenre().stream().map(Genre::getName)
-                            .collect(Collectors.toSet()))
-                    .description(book.getDescription())
-                    .publishDate(book.getPublishDate())
-                    .publisher(PublisherDTO.builder().name(book.getPublisher().getName()).build())
-                    .language(book.getLanguage())
-                    .pages(book.getPages())
-                    .tags(book.getTags().stream().map(tg -> tg.getName().name())
-                            .collect(Collectors.toSet()))
-                    .stock(book.getStock())
-                    .build();
+            BookDTO bookDTO = bookMapper.toDto(book);
 
-            return ResponseEntity.ok(Response.builder()
-                    .timeStamp(LocalDateTime.now())
-                    .data(Map.of("book", booKDTO))
-                    .message("Book Retrieved")
-                    .status(HttpStatus.OK)
-                    .statusCode(HttpStatus.OK.value())
-                    .build());
+            return  ResponseEntity.ok(
+                    responseMapper.toResponse(
+                            bookDTO,
+                            "Book Retrieved",
+                            "Book",
+                            HttpStatus.OK));
 
         }
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Response.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .message("Book Not Found")
-                        .status(HttpStatus.NOT_FOUND)
-                        .statusCode(HttpStatus.NOT_FOUND.value())
-                        .build());
+                .body(responseMapper.toResponse(null,
+                        "Book not found",
+                        "Book",
+                        HttpStatus.NOT_FOUND));
 
     }
+
+
+
+    @GetMapping("/publishers/{id}/books")
+    public ResponseEntity<Response> findPublisherBooks(@PathVariable Long id) {
+        Set<Book> bookList = bookService.findByPublisher(Publisher.builder().id(id).build());
+        List<BookDTO> bookDTOList = bookList.stream().map(book -> bookMapper.toDto(book)).toList();
+
+        return  ResponseEntity.ok(
+                responseMapper.toResponse(
+                        bookDTOList,
+                        bookDTOList.isEmpty() ? "Publisher does not have any books" : "Publisher´s books retrieved",
+                        "Book(s)",
+                        HttpStatus.OK));
+
+    }
+
+    @GetMapping("/authors/{id}/books")
+    public ResponseEntity<Response> findAuthorBooks(@PathVariable Long id) {
+        Set<Book> bookList = bookService.findByAuthor(Author.builder().id(id).build());
+        List<BookDTO> bookDTOList = bookList.stream().map(book -> bookMapper.toDto(book)).toList();
+
+        return  ResponseEntity.ok(
+                responseMapper.toResponse(
+                        bookDTOList,
+                        bookDTOList.isEmpty() ? "Author does not have any books" : "Author´s books retrieved",
+                        "Book(s)",
+                        HttpStatus.OK));
+
+    }
+
+    @GetMapping("/genres/{id}/books")
+    public ResponseEntity<Response> findGenreBooks(@PathVariable Long id) {
+        Set<Book> bookList = bookService.findByGenre(Genre.builder().id(id).build());
+        List<BookDTO> bookDTOList = bookList.stream().map(book -> bookMapper.toDto(book)).toList();
+
+        return  ResponseEntity.ok(
+                responseMapper.toResponse(
+                        bookDTOList,
+                        bookDTOList.isEmpty() ? "Genre does not have any books" : "Genre´s books retrieved",
+                        "Book(s)",
+                        HttpStatus.OK));
+
+    }
+
+
+
     @Operation(summary = "Create a new book")
     @ApiResponse(responseCode = "201", description = "Book Created", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
     @ApiResponse(responseCode = "400", description = "Missing one or more required fields", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
     @PostMapping("/books")
     public ResponseEntity<Response> save(@Valid @RequestBody BookDTO booKDTO) {
         try {
-            Book bookToSave = Book.builder()
-                    .isbn(booKDTO.getIsbn())
-                    .title(booKDTO.getTitle())
-                    .author(Author.builder().id(booKDTO.getAuthor().getId()).build())
-                    .genre(booKDTO.getGenre().stream().map(genre -> Genre.builder().name(genre.toUpperCase()).build()).collect(Collectors.toSet()))
-                    .description(booKDTO.getDescription())
-                    .publishDate(booKDTO.getPublishDate())
-                    .publisher(Publisher.builder().id(booKDTO.getPublisher().getId()).build())
-                    .language(booKDTO.getLanguage())
-                    .pages(booKDTO.getPages())
-                    .tags(booKDTO.getTags().stream().map(tag -> Tag.builder().name(ETag.valueOf(tag)).build()).collect(Collectors.toSet()))
-                    .stock(booKDTO.getStock())
-                    .build();
-
-            bookToSave.getGenre().stream().map( g -> {
-                if (genreService.findByName(g.getName()).isEmpty()) {
-                    genreService.save(g);
-                }
-                return null;
-            });
-
-            bookToSave.getTags().stream().map( tg -> {
-                if (tagService.findByName(tg.getName()).isEmpty()) {
-                    tagService.save(tg);
-                }
-                return null;
-            });
-
-
+            Book bookToSave = bookMapper.toEntity(booKDTO);
             bookService.save(bookToSave);
 
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(Response.builder()
-                            .timeStamp(LocalDateTime.now())
-                            .message("Book Created")
-                            .status(HttpStatus.CREATED)
-                            .statusCode(HttpStatus.CREATED.value())
-                            .build());
+                    .body(responseMapper.toResponse(null,
+                            "Book Entry Added",
+                            "Book",
+                            HttpStatus.CREATED));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Response.builder()
-                            .timeStamp(LocalDateTime.now())
-                            .message("Missing one or more required fields" + e.getMessage())
-                            .status(HttpStatus.BAD_REQUEST)
-                            .statusCode(HttpStatus.BAD_REQUEST.value())
-                            .build());
+                    .body(responseMapper.toResponse(null,
+                            "Missing a required parameter",
+                            "Book(s)",
+                            HttpStatus.BAD_REQUEST));
 
         }
 
@@ -230,38 +198,25 @@ public class BookApiController {
 
             if (optionalBook.isPresent()) {
                 Book updatedBook = optionalBook.get();
-                updatedBook.setTitle(booKDTO.getTitle());
-                updatedBook.setAuthor(Author.builder().id(booKDTO.getAuthor().getId()).build());
-                updatedBook.setDescription(booKDTO.getDescription());
-                updatedBook.setIsbn(booKDTO.getIsbn());
-                updatedBook.setGenre(booKDTO.getGenre().stream().map(genre -> Genre.builder().name(genre).build()).collect(Collectors.toSet()));
-                updatedBook.setLanguage(booKDTO.getLanguage());
-                updatedBook.setPublishDate(booKDTO.getPublishDate());
-                updatedBook.setPublisher(Publisher.builder().id(booKDTO.getPublisher().getId()).build());
-                updatedBook.setStock(booKDTO.getStock());
-                updatedBook.setPages(booKDTO.getPages());
-                updatedBook.setTags(booKDTO.getTags().stream().map(tag -> Tag.builder().name(ETag.valueOf(tag)).build()).collect(Collectors.toSet()));
+                Book mappedBook = bookMapper.toEntity(booKDTO);
+                mappedBook.setId(updatedBook.getId());
+                bookService.save(mappedBook);
 
-                bookService.save(updatedBook);
-
-                return ResponseEntity.status(HttpStatus.OK).body(Response.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .message("Book Updated")
-                        .status(HttpStatus.OK)
-                        .statusCode(HttpStatus.OK.value())
-                        .build());
+                return  ResponseEntity.ok(
+                        responseMapper.toResponse(
+                                null,
+                                "Book Updated",
+                                "Book",
+                                HttpStatus.OK));
 
             }
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Response.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .message("Book Not Found")
-                        .status(HttpStatus.NOT_FOUND)
-                        .statusCode(HttpStatus.NOT_FOUND.value())
-                        .build());
+                .body(responseMapper.toResponse(null,
+                        "Book not found",
+                        "Book",
+                        HttpStatus.NOT_FOUND));
     }
-
 
 
     @Operation(summary = "Delete book by ID")
@@ -273,21 +228,19 @@ public class BookApiController {
 
         if (optionalBook.isPresent()) {
             bookService.deleteById(optionalBook.get().getId());
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body(Response.builder()
-                    .timeStamp(LocalDateTime.now())
-                    .message("Book Eliminated")
-                    .status(HttpStatus.ACCEPTED)
-                    .statusCode(HttpStatus.ACCEPTED.value())
-                    .build());
+            return  ResponseEntity.ok(
+                    responseMapper.toResponse(
+                            null,
+                            "Book Deleted",
+                            "Book",
+                            HttpStatus.OK));
         }
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Response.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .message("Book to delete was not found")
-                        .status(HttpStatus.NOT_FOUND)
-                        .statusCode(HttpStatus.NOT_FOUND.value())
-                        .build());
+                .body(responseMapper.toResponse(null,
+                        "Book not found",
+                        "Book",
+                        HttpStatus.NOT_FOUND));
     }
 
 

@@ -32,6 +32,7 @@ public class BookDTO {
     private Long authorID;
 
     private String author;
+
     @NotEmpty
     private Set<Long> genreIDs;
 

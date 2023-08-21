@@ -1,6 +1,8 @@
 package cl.soyunmate.BookVerse.controller.api.v1;
 
 import cl.soyunmate.BookVerse.DTO.*;
+import cl.soyunmate.BookVerse.DTO.mapper.PublisherMapper;
+import cl.soyunmate.BookVerse.DTO.mapper.ResponseMapper;
 import cl.soyunmate.BookVerse.model.Book;
 import cl.soyunmate.BookVerse.model.Genre;
 import cl.soyunmate.BookVerse.model.Publisher;
@@ -10,6 +12,7 @@ import cl.soyunmate.BookVerse.service.IBookService;
 import cl.soyunmate.BookVerse.service.IPublisherService;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,8 +32,11 @@ public class PublisherApiController {
     @Autowired
     private IPublisherService publisherService;
 
-    @Autowired
-    private IBookService bookService;
+   @Autowired
+   private ResponseMapper responseMapper;
+
+   @Autowired
+   private PublisherMapper publisherMapper;
 
     @GetMapping("/publishers")
     public ResponseEntity<Response> findAll(@Parameter(description = "Filter by publisher name") @RequestParam(required = false, defaultValue = "") String publisher,
@@ -45,32 +51,20 @@ public class PublisherApiController {
         }
 
         if (!passedAnyFilter && !request.getParameterMap().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Response.builder()
-                            .timeStamp(LocalDateTime.now())
-                            .message("Invalid Query parameter")
-                            .status(HttpStatus.BAD_REQUEST)
-                            .statusCode(HttpStatus.BAD_REQUEST.value())
-                            .build());
+            return  ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(responseMapper.toResponse(
+                            null,
+                            "Invalid Query parameter",
+                            "Publisher",
+                            HttpStatus.BAD_REQUEST));
         }
 
-        List<PublisherDTO> publisherDTOList= publisherList.stream().map(pb -> PublisherDTO
-                .builder()
-                        .id(pb.getId())
-                        .name(pb.getName())
-                        .description(pb.getDescription())
-                        .webSite(pb.getWebSite())
-                        .build())
-                .toList();
+        List<PublisherDTO> publisherDTOList= publisherList.stream().map(pb -> publisherMapper.toDto(pb) ).toList();
 
-        return ResponseEntity.ok(
-                Response.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .data(Map.of("Publishers", publisherDTOList))
-                        .message("All Publishers Retrieved")
-                        .status(HttpStatus.OK)
-                        .statusCode(HttpStatus.OK.value())
-                        .build());
+        return  ResponseEntity.ok(responseMapper.toResponse(publisherDTOList,
+                "All Publishers retrieved",
+                "Publisher(s)",
+                HttpStatus.OK));
 
 
     }
@@ -81,148 +75,73 @@ public class PublisherApiController {
 
         if (optionalPublisher.isPresent()) {
             Publisher publisher = optionalPublisher.get();
-            PublisherDTO publisherDTO = PublisherDTO.builder()
-                    .id(publisher.getId())
-                    .name(publisher.getName())
-                    .description(publisher.getDescription())
-                    .webSite(publisher.getWebSite())
-                    .build();
+            PublisherDTO publisherDTO = publisherMapper.toDto(publisher);
 
-            return ResponseEntity.ok(
-                    Response.builder()
-                            .timeStamp(LocalDateTime.now())
-                            .data(Map.of("Publisher", publisherDTO))
-                            .message("Publishers Retrieved")
-                            .status(HttpStatus.OK)
-                            .statusCode(HttpStatus.OK.value())
-                            .build());
+            return  ResponseEntity.ok(responseMapper.toResponse(publisherDTO,
+                    "Publisher Retrieved",
+                    "Publisher",
+                    HttpStatus.OK));
 
         }
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Response.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .message("Publisher Not Found")
-                        .status(HttpStatus.NOT_FOUND)
-                        .statusCode(HttpStatus.NOT_FOUND.value())
-                        .build());
+        return  ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(responseMapper.toResponse(
+                        null,
+                        "Publisher not found",
+                        "Publisher",
+                        HttpStatus.NOT_FOUND));
     }
 
-    @GetMapping("/publishers/{id}/books")
-    public ResponseEntity<Response> findPublisherBooks(@PathVariable Long id) {
-        Optional<Publisher> optionalPublisher = publisherService.findById(id);
 
-        if (optionalPublisher.isPresent()) {
-            Set<Book> bookSet = bookService.findByPublisher(optionalPublisher.get());
-            List<BookDTO> bookDTOList = bookSet.stream().map(book -> BookDTO.builder()
-                    .id(book.getId())
-                    .isbn(book.getIsbn())
-                    .title(book.getTitle())
-                    .author(AuthorDTO.builder()
-                            .id(book.getAuthor().getId())
-                            .firstName(book.getAuthor().getFirstName())
-                            .lastName(book.getAuthor().getLastName())
-                            .build())
-                    .genre(book.getGenre().stream().map(Genre::getName)
-                            .collect(Collectors.toSet()))
-                    .description(book.getDescription())
-                    .publishDate(book.getPublishDate())
-                    .publisher(PublisherDTO.builder().name(book.getPublisher().getName()).build())
-                    .language(book.getLanguage())
-                    .pages(book.getPages())
-                    .tags(book.getTags().stream().map(tg -> tg.getName().name())
-                            .collect(Collectors.toSet()))
-                    .stock(book.getStock())
-                    .build()).toList();
-
-            return ResponseEntity.ok(
-                    Response.builder()
-                            .timeStamp(LocalDateTime.now())
-                            .data(Map.of("books", bookDTOList))
-                            .message( "Publisher´s books retrieved")
-                            .status(HttpStatus.OK)
-                            .statusCode(HttpStatus.OK.value())
-                            .build());
-        }
-
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Response.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .message("Publisher Not Found")
-                        .status(HttpStatus.NOT_FOUND)
-                        .statusCode(HttpStatus.NOT_FOUND.value())
-                        .build());
-    }
 
     @PostMapping("/publishers")
-    public ResponseEntity<Response> save(@RequestBody PublisherDTO publisherDTO) {
+    public ResponseEntity<Response> save(@Valid @RequestBody PublisherDTO publisherDTO) {
 
         if (!publisherDTO.getName().isBlank()) {
-            Publisher publisherToSave = Publisher.builder()
-                    .name(publisherDTO.getName())
-                    .description(publisherDTO.getDescription())
-                    .webSite(publisherDTO.getWebSite())
-                    .build();
+            Publisher publisherToSave = publisherMapper.toEntity(publisherDTO);
 
             publisherService.save(publisherToSave);
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(Response.builder()
-                            .timeStamp(LocalDateTime.now())
-                            .message("Publisher Entry Added")
-                            .status(HttpStatus.CREATED)
-                            .statusCode(HttpStatus.CREATED.value())
-                            .build());
+            return  ResponseEntity.status(HttpStatus.CREATED)
+                    .body(responseMapper.toResponse(
+                            null,
+                            "Publisher Entry added",
+                            "Publisher",
+                            HttpStatus.CREATED));
         }
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Response.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .message("New Publishers need to at least have a name!")
-                        .status(HttpStatus.BAD_REQUEST)
-                        .statusCode(HttpStatus.BAD_REQUEST.value())
-                        .build());
+        return  ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(responseMapper.toResponse(
+                        null,
+                        "Missing one or more required fields",
+                        "Publisher",
+                        HttpStatus.BAD_REQUEST));
     }
 
     @PutMapping("/publishers/{id}")
-    public ResponseEntity<Response> updateById(@PathVariable Long id, @RequestBody PublisherDTO publisherDTO) {
+    public ResponseEntity<Response> updateById(@PathVariable Long id, @Valid @RequestBody PublisherDTO publisherDTO) {
 
         Optional<Publisher> optionalPublisher = publisherService.findById(id);
 
         if (optionalPublisher.isPresent()) {
-            if(publisherDTO.getName().isBlank()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(Response.builder()
-                                .timeStamp(LocalDateTime.now())
-                                .message("Publishers need to at least have a name!")
-                                .status(HttpStatus.BAD_REQUEST)
-                                .statusCode(HttpStatus.BAD_REQUEST.value())
-                                .build());
-            }
-
             Publisher publisherToUpdate = optionalPublisher.get();
-            publisherToUpdate.setName(publisherDTO.getName());
-            publisherToUpdate.setDescription(publisherDTO.getDescription());
-            publisherToUpdate.setWebSite(publisherDTO.getWebSite());
+            Publisher mappedPublisher = publisherMapper.toEntity(publisherDTO);
+            mappedPublisher.setId(publisherToUpdate.getId());
+            publisherService.save(mappedPublisher);
 
-            publisherService.save(publisherToUpdate);
-            return ResponseEntity.ok(
-                    Response.builder()
-                            .timeStamp(LocalDateTime.now())
-                            .message("Publisher Updated")
-                            .status(HttpStatus.OK)
-                            .statusCode(HttpStatus.OK.value())
-                            .build());
+            return  ResponseEntity.ok(responseMapper.toResponse(null,
+                    "Publisher Updated",
+                    "Publisher",
+                    HttpStatus.OK));
 
 
         }
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Response.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .message("Publisher Not Found")
-                        .status(HttpStatus.NOT_FOUND)
-                        .statusCode(HttpStatus.NOT_FOUND.value())
-                        .build());
+        return  ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(responseMapper.toResponse(
+                        null,
+                        "Publisher not found",
+                        "Publisher",
+                        HttpStatus.NOT_FOUND));
     }
     @DeleteMapping("/publishers/{id}")
     public ResponseEntity<Response> deleteById(@PathVariable Long id) {
@@ -231,22 +150,18 @@ public class PublisherApiController {
         if (optionalPublisher.isPresent()) {
             publisherService.deleteById(optionalPublisher.get().getId());
 
-            return ResponseEntity.ok(
-                    Response.builder()
-                            .timeStamp(LocalDateTime.now())
-                            .message("Publisher Eliminated")
-                            .status(HttpStatus.OK)
-                            .statusCode(HttpStatus.OK.value())
-                            .build());
+            return  ResponseEntity.ok(responseMapper.toResponse(null,
+                    "Publisher Eliminated",
+                    "Publisher",
+                    HttpStatus.OK));
         }
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Response.builder()
-                        .timeStamp(LocalDateTime.now())
-                        .message("Cannot Eliminate a non-existent entry")
-                        .status(HttpStatus.NOT_FOUND)
-                        .statusCode(HttpStatus.NOT_FOUND.value())
-                        .build());
+        return  ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(responseMapper.toResponse(
+                        null,
+                        "Publisher not found",
+                        "Publisher",
+                        HttpStatus.NOT_FOUND));
 
     }
 
