@@ -119,7 +119,8 @@ public class BookApiController {
     }
 
 
-
+    @Operation(summary = "Find books by publisher ID")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved publisher's books", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
     @GetMapping("/publishers/{id}/books")
     public ResponseEntity<Response> findPublisherBooks(@PathVariable Long id) {
         Set<Book> bookList = bookService.findByPublisher(Publisher.builder().id(id).build());
@@ -133,7 +134,8 @@ public class BookApiController {
                         HttpStatus.OK));
 
     }
-
+    @Operation(summary = "Find books by author ID")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved author's books", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
     @GetMapping("/authors/{id}/books")
     public ResponseEntity<Response> findAuthorBooks(@PathVariable Long id) {
         Set<Book> bookList = bookService.findByAuthor(Author.builder().id(id).build());
@@ -148,6 +150,8 @@ public class BookApiController {
 
     }
 
+    @Operation(summary = "Find books by genre ID")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved genre's books", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
     @GetMapping("/genres/{id}/books")
     public ResponseEntity<Response> findGenreBooks(@PathVariable Long id) {
         Set<Book> bookList = bookService.findByGenre(Genre.builder().id(id).build());

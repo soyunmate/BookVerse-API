@@ -10,11 +10,16 @@ import cl.soyunmate.BookVerse.model.Response;
 import cl.soyunmate.BookVerse.model.enums.ETag;
 import cl.soyunmate.BookVerse.service.IBookService;
 import cl.soyunmate.BookVerse.service.IPublisherService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.w3c.dom.stylesheets.LinkStyle;
@@ -38,6 +43,9 @@ public class PublisherApiController {
    @Autowired
    private PublisherMapper publisherMapper;
 
+    @Operation(summary = "Find publishers with filters")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved publishers", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
+    @ApiResponse(responseCode = "400", description = "Invalid Query parameter", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
     @GetMapping("/publishers")
     public ResponseEntity<Response> findAll(@Parameter(description = "Filter by publisher name") @RequestParam(required = false, defaultValue = "") String publisher,
                                             HttpServletRequest request) {
@@ -68,6 +76,9 @@ public class PublisherApiController {
 
 
     }
+    @Operation(summary = "Find publisher by ID")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved publisher", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
+    @ApiResponse(responseCode = "404", description = "Publisher not found", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
     @GetMapping("/publishers/{id}")
     public ResponseEntity<Response> findById(@PathVariable Long id) {
 
@@ -93,13 +104,14 @@ public class PublisherApiController {
     }
 
 
-
+    @Operation(summary = "Create a new publisher entry")
+    @ApiResponse(responseCode = "201", description = "Publisher Entry added", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
+    @ApiResponse(responseCode = "400", description = "Missing one or more required fields", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
     @PostMapping("/publishers")
     public ResponseEntity<Response> save(@Valid @RequestBody PublisherDTO publisherDTO) {
 
-        if (!publisherDTO.getName().isBlank()) {
+        try {
             Publisher publisherToSave = publisherMapper.toEntity(publisherDTO);
-
             publisherService.save(publisherToSave);
             return  ResponseEntity.status(HttpStatus.CREATED)
                     .body(responseMapper.toResponse(
@@ -107,16 +119,19 @@ public class PublisherApiController {
                             "Publisher Entry added",
                             "Publisher",
                             HttpStatus.CREATED));
+        } catch (Exception e) {
+            return  ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(responseMapper.toResponse(
+                            null,
+                            "Missing one or more required fields",
+                            "Publisher",
+                            HttpStatus.BAD_REQUEST));
         }
-
-        return  ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(responseMapper.toResponse(
-                        null,
-                        "Missing one or more required fields",
-                        "Publisher",
-                        HttpStatus.BAD_REQUEST));
     }
 
+    @Operation(summary = "Update publisher by ID")
+    @ApiResponse(responseCode = "200", description = "Publisher Updated", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
+    @ApiResponse(responseCode = "404", description = "Publisher not found", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
     @PutMapping("/publishers/{id}")
     public ResponseEntity<Response> updateById(@PathVariable Long id, @Valid @RequestBody PublisherDTO publisherDTO) {
 
@@ -143,6 +158,9 @@ public class PublisherApiController {
                         "Publisher",
                         HttpStatus.NOT_FOUND));
     }
+    @Operation(summary = "Delete publisher by ID")
+    @ApiResponse(responseCode = "200", description = "Publisher Eliminated", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
+    @ApiResponse(responseCode = "404", description = "Publisher not found", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
     @DeleteMapping("/publishers/{id}")
     public ResponseEntity<Response> deleteById(@PathVariable Long id) {
         Optional<Publisher> optionalPublisher = publisherService.findById(id);

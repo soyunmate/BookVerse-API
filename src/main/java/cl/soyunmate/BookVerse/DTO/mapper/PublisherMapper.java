@@ -2,7 +2,9 @@ package cl.soyunmate.BookVerse.DTO.mapper;
 
 import cl.soyunmate.BookVerse.DTO.PublisherDTO;
 import cl.soyunmate.BookVerse.model.Publisher;
+import org.springframework.stereotype.Component;
 
+@Component
 public class PublisherMapper {
 
     public PublisherDTO toDto(Publisher publisher) {
