@@ -126,5 +126,7 @@ INSERT INTO book_tags (book_id, tag_id) VALUES (7, 8);
 
 
 -- Usuarios
-INSERT INTO users (last_name, email, first_name, password, username) VALUES ('Apellido 1', 'usuario1@example.com', 'Usuario', 'password1', 'usuario1');
-INSERT INTO users (last_name, email, first_name, password, username) VALUES ('Apellido 2', 'usuario2@example.com', 'Usuario', 'password2', 'usuario2');
+--INSERT INTO users (last_name, email, first_name, password, username) VALUES ('Apellido 1', 'usuario1@example.com', 'Usuario', 'password1', 'usuario1');
+--INSERT INTO users (last_name, email, first_name, password, username) VALUES ('Apellido 2', 'usuario2@example.com', 'Usuario', 'password2', 'usuario2');
+
+-- INSERT INTO users (last_name, email, first_name, password, username) VALUES ('admin', 'admin@gmail.com', 'admin', '1234', 'admin');
