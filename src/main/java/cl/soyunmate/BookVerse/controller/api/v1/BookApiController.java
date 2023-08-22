@@ -43,7 +43,6 @@ public class BookApiController {
 
     @Operation(summary = "Find books with optional filters")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved books", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/books")
     public ResponseEntity<Response> findAll(@Parameter(description = "Filter by author's last name") @RequestParam(required = false, defaultValue = "") String author,
                                             @Parameter(description = "Filter by genre name") @RequestParam(required = false, defaultValue = "") String genre,
@@ -170,9 +169,10 @@ public class BookApiController {
 
 
 
-    @Operation(summary = "Create a new book")
+    @Operation(summary = "Create a new book - Require Admin role")
     @ApiResponse(responseCode = "201", description = "Book Created", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
     @ApiResponse(responseCode = "400", description = "Missing one or more required fields", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/books")
     public ResponseEntity<Response> save(@Valid @RequestBody BookDTO booKDTO) {
         try {
@@ -195,9 +195,10 @@ public class BookApiController {
 
     }
 
-    @Operation(summary = "Update book by ID")
+    @Operation(summary = "Update book by ID - Require Admin role")
     @ApiResponse(responseCode = "200", description = "Book Updated", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
     @ApiResponse(responseCode = "404", description = "Book not found", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/books/{id}")
     public ResponseEntity<Response> updateById(@PathVariable Long id, @Valid @RequestBody BookDTO booKDTO) {
         Optional<Book> optionalBook = bookService.findById(id);
@@ -225,9 +226,10 @@ public class BookApiController {
     }
 
 
-    @Operation(summary = "Delete book by ID")
+    @Operation(summary = "Delete book by ID - Require Admin role")
     @ApiResponse(responseCode = "202", description = "Book Eliminated", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
     @ApiResponse(responseCode = "404", description = "Book to delete was not found", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/books/{id}")
     public ResponseEntity<Response> deleteByid(@PathVariable Long id) {
         Optional<Book> optionalBook = bookService.findById(id);

@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -82,9 +83,10 @@ public class GenreApiController {
                         HttpStatus.NOT_FOUND));
     }
 
-    @Operation(summary = "Create a new genre entry")
+    @Operation(summary = "Create a new genre entry - Require Admin role")
     @ApiResponse(responseCode = "201", description = "Genre Entry added", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
     @ApiResponse(responseCode = "400", description = "Missing one or more required fields", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/genres")
     public ResponseEntity<Response> save( @Valid @RequestBody GenreDTO genreDTO) {
         try {
@@ -106,9 +108,10 @@ public class GenreApiController {
         }
     }
 
-    @Operation(summary = "Update genre by ID")
+    @Operation(summary = "Update genre by ID - Require Admin role")
     @ApiResponse(responseCode = "200", description = "Genre Updated", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
     @ApiResponse(responseCode = "404", description = "Genre not found", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/genres/{id}")
     public ResponseEntity<Response> updateById(@PathVariable Long id, @Valid @RequestBody GenreDTO genreDTO) {
         Optional<Genre> optionalGenre = genreService.findById(id);
@@ -117,7 +120,7 @@ public class GenreApiController {
             Genre genreToUpdate = optionalGenre.get();
             Genre mappedGenre = genreMapper.toEntity(genreDTO);
             mappedGenre.setId(genreToUpdate.getId());
-            genreService.save(genreToUpdate);
+            genreService.save(mappedGenre);
 
             return  ResponseEntity.ok(responseMapper.toResponse(null,
                     "Genre Updated",
@@ -134,9 +137,10 @@ public class GenreApiController {
     }
 
 
-    @Operation(summary = "Delete genre by ID")
+    @Operation(summary = "Delete genre by ID - Require Admin role")
     @ApiResponse(responseCode = "200", description = "Genre Eliminated", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
     @ApiResponse(responseCode = "404", description = "Genre not found", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Response.class)))
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/genres/{id}")
     public ResponseEntity<Response> deleteById(@PathVariable Long id) {
         Optional<Genre> optionalGenre = genreService.findById(id);
