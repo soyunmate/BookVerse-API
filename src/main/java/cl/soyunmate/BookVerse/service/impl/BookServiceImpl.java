@@ -1,6 +1,5 @@
 package cl.soyunmate.BookVerse.service.impl;
 
-import cl.soyunmate.BookVerse.DTO.BookSearch;
 import cl.soyunmate.BookVerse.model.*;
 import cl.soyunmate.BookVerse.persistence.IBookDAO;
 import cl.soyunmate.BookVerse.service.IBookService;

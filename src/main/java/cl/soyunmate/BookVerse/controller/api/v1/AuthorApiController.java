@@ -4,12 +4,8 @@ import cl.soyunmate.BookVerse.DTO.*;
 import cl.soyunmate.BookVerse.DTO.mapper.AuthorMapper;
 import cl.soyunmate.BookVerse.DTO.mapper.ResponseMapper;
 import cl.soyunmate.BookVerse.model.Author;
-import cl.soyunmate.BookVerse.model.Book;
-import cl.soyunmate.BookVerse.model.Genre;
 import cl.soyunmate.BookVerse.model.Response;
-import cl.soyunmate.BookVerse.model.enums.ETag;
 import cl.soyunmate.BookVerse.service.IAuthorService;
-import cl.soyunmate.BookVerse.service.IBookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -23,13 +19,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1")

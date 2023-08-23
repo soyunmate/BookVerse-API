@@ -4,17 +4,12 @@ import cl.soyunmate.BookVerse.DTO.*;
 import cl.soyunmate.BookVerse.DTO.mapper.BookMapper;
 import cl.soyunmate.BookVerse.DTO.mapper.ResponseMapper;
 import cl.soyunmate.BookVerse.model.*;
-import cl.soyunmate.BookVerse.model.enums.ETag;
-import cl.soyunmate.BookVerse.service.IAuthorService;
 import cl.soyunmate.BookVerse.service.IBookService;
-import cl.soyunmate.BookVerse.service.IGenreService;
-import cl.soyunmate.BookVerse.service.ITagService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,13 +18,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1")

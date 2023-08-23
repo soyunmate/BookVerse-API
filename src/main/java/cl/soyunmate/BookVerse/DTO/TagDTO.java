@@ -2,7 +2,6 @@ package cl.soyunmate.BookVerse.DTO;
 
 import cl.soyunmate.BookVerse.model.enums.ETag;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
